@@ -6,7 +6,7 @@ A Google Apps Script that automatically classifies promotional emails using Gemi
 
 - **AI-powered classification** using Google Gemini 2.5 Flash
 - **Whitelist support** for senders you always want to keep
-- **Topic-based filtering** (AI, work, Black communities, entrepreneurship, etc.)
+- **Topic-based filtering** - customize topics you want to keep
 - **Auto-unsubscribe** via mailto or HTTP links
 - **Learning from corrections** - improves over time based on your feedback
 - **Daily summary email** with processing results
@@ -53,11 +53,26 @@ A Google Apps Script that automatically classifies promotional emails using Gemi
 | Status | Email sent/Link visited/Manual needed/Kept |
 | Your Correction | Fill this to teach the AI |
 
+## Customization
+
+Edit the CONFIG section to customize:
+
+- **WHITELIST** - Senders that are always kept (partial match, case-insensitive)
+- **TOPICS_TO_KEEP** - Topics the AI should keep
+- **MAX_EMAILS** - How many emails to process per run
+
 ## Rate Limits
 
 - Gemini 2.5 Flash free tier: 10 requests/minute
 - Script includes 7-second delay between emails to stay under limit
-- Adjust `MAX_EMAILS` in CONFIG to process more/fewer per run
+- 50 emails takes ~6 minutes to process
+
+## Getting a Gemini API Key
+
+1. Go to [Google AI Studio](https://aistudio.google.com/)
+2. Click "Get API Key"
+3. Create a new API key
+4. Copy it into the CONFIG section
 
 ## License
 

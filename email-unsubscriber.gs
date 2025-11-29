@@ -22,7 +22,7 @@ const CONFIG = {
   GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY_HERE',
 
   // Your Google Sheet ID (from the URL)
-  SHEET_ID: '1PgDENBnvvq_wGYMIHNFz-jnSfArn2UoSsS2-sR1d-YM',
+  SHEET_ID: 'YOUR_GOOGLE_SHEET_ID_HERE',
 
   // Sheet tab name
   SHEET_NAME: 'Sheet1',
@@ -34,35 +34,23 @@ const CONFIG = {
   MAX_EMAILS: 50,
 
   // Whitelisted senders (always KEEP, no AI call)
+  // Add partial matches - e.g., 'morning brew' matches 'Morning Brew <news@morningbrew.com>'
   WHITELIST: [
-    'lenny',
-    'lennys newsletter',
-    'ai with allie',
-    'peter yang',
-    'the listings project',
-    'listings project',
-    'thrifty traveler',
-    'snacks',
-    'morning brew',
-    'ideabrowser',
-    'a16z speedrun',
-    'a16z',
-    'linkedin',
-    'harvard black alumni',
-    'national black mba',
-    'nbmbaa'
+    'example newsletter',
+    'important sender',
+    'linkedin'
+    // Add your whitelisted senders here
   ],
 
-  // Topics to keep
+  // Topics to keep - emails matching these topics will be kept
   TOPICS_TO_KEEP: [
     'AI',
     'artificial intelligence',
     'work',
     'career',
-    'Black communities',
-    'Black culture',
     'entrepreneurship',
     'startups'
+    // Add your topics here
   ]
 };
 
@@ -103,8 +91,8 @@ function main() {
       // Log to sheet
       logToSheet(result);
 
-      // Small delay to avoid rate limits
-      Utilities.sleep(500);
+      // Delay to stay under Gemini free tier rate limit (10 req/min)
+      Utilities.sleep(7000);
 
     } catch (error) {
       console.error(`Error processing email: ${error.message}`);
@@ -189,6 +177,12 @@ function processEmail(email, corrections) {
   // If UNSUBSCRIBE, try to unsubscribe and archive
   if (result.decision === 'UNSUBSCRIBE') {
     result.status = tryUnsubscribe(email.message, result.unsubscribeLink);
+
+    // If we couldn't auto-unsubscribe, replace with Gmail link
+    if (result.status === 'Manual needed') {
+      result.unsubscribeLink = 'https://mail.google.com/mail/u/0/#inbox/' + email.id;
+    }
+
     archiveEmail(email.thread);
   } else {
     result.status = 'Kept';
@@ -255,7 +249,8 @@ INSTRUCTIONS:
 }
 
 function callGeminiAPI(prompt) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+  var baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  var url = baseUrl + '?key=' + CONFIG.GEMINI_API_KEY;
 
   const payload = {
     contents: [{
@@ -265,7 +260,7 @@ function callGeminiAPI(prompt) {
     }],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 200
+      maxOutputTokens: 1024
     }
   };
 
